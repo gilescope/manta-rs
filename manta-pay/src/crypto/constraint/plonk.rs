@@ -15,3 +15,16 @@
 // along with manta-rs.  If not, see <http://www.gnu.org/licenses/>.
 
 //! PLONK Constraint System and Proof System Implementations
+
+use zk_garage_plonk::constraint_system::StandardComposer;
+use manta_crypto::{
+    constraint::{
+        measure::Measure, Add, ConditionalSelect, Constant, ConstraintSystem, Equal, Public,
+        Secret, Variable,
+    },
+    rand::{CryptoRng, RngCore, Sample, Standard},
+};
+
+impl ConstraintSystem for StandardComposer {
+    
+}
