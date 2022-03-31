@@ -58,7 +58,7 @@ groth16 = ["ark-groth16", "ark-snark", "arkworks"]
 http = ["futures", "reqwest", "serde"]
 
 # Enable PLONK ZKP System
-plonk = ["zk-garage-plonk"]
+plonk = ["zk-garage-plonk","ark-ec", "ark-ff", "ark-poly", "ark-poly-commit"]
 
 # SCALE Codec and Type Info
 scale = ["scale-codec", "scale-info"]
@@ -111,6 +111,7 @@ indexmap = { version = "1.8.0", optional = true, default-features = false }
 manta-accounting = { path = "../manta-accounting", default-features = false }
 manta-crypto = { path = "../manta-crypto", default-features = false }
 manta-util = { path = "../manta-util", default-features = false }
+merlin = { version = "3.0", default-features = false }
 parking_lot = { version = "0.12.0", optional = true, default-features = false }
 rand_chacha = { version = "0.3.1", default-features = false }
 rayon = { version = "1.5.1", optional = true, default-features = false }
