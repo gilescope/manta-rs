@@ -58,7 +58,7 @@ groth16 = ["ark-groth16", "ark-snark", "arkworks"]
 http = ["futures", "reqwest", "serde"]
 
 # Enable PLONK ZKP System
-plonk = ["zk-garage-plonk","ark-ec", "ark-ff", "ark-poly", "ark-poly-commit"]
+plonk = ["zk-garage-plonk","ark-ec", "ark-ff", "ark-poly", "ark-poly-commit", "ark-serialize", "arkworks"]
 
 # SCALE Codec and Type Info
 scale = ["scale-codec", "scale-info"]
@@ -124,5 +124,5 @@ tungstenite = { version = "0.17.2", optional = true, default-features = false, f
 zk-garage-plonk = { package = "plonk-core", git = "https://github.com/zk-garage/plonk", optional = true, default-features = false }
 
 [dev-dependencies]
-manta-pay = { path = ".", features = ["groth16", "test"] }
+manta-pay = { path = ".", features = ["plonk", "test"] }
 manta-crypto = { path = "../manta-crypto", default-features = false, features = ["getrandom"] }

@@ -20,6 +20,11 @@
 #[cfg_attr(doc_cfg, doc(cfg(feature = "arkworks")))]
 pub mod arkworks;
 
+// #[cfg(feature = "plonk")]
+// #[cfg_attr(doc_cfg, doc(cfg(feature = "plonk")))]
+// pub mod plonk;
+
 #[cfg(feature = "plonk")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "plonk")))]
-pub mod plonk;
+pub mod plonk_serialize;
+
