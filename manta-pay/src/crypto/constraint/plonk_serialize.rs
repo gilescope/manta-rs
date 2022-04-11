@@ -46,19 +46,6 @@ use zk_garage_plonk::{
     proof_system::{self, Prover, ProverKey, Verifier, VerifierKey},
 };
 
-// struct AlignedKeccakState([u8; 200]);
-
-// pub struct Strobe128 {
-//     state: AlignedKeccakState,
-//     pos: u8,
-//     pos_begin: u8,
-//     cur_flags: u8,
-// }
-
-// pub struct Transcript {
-//     strobe: Strobe128,
-// }
-
 // pub struct Proof<F, PC>
 // where
 //     F: PrimeField,
@@ -291,9 +278,10 @@ where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
 {
-    fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
-         todo!() 
-        }
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
+        // TODO: Need to implement debug for transcript
+        write!(f, "prover_key: {:?}, pc_commit_key: {:?}, transcript: TODO in zk-garage", self.prover_key, self.pc_commit_key)
+    }
 }
 
 impl<F, PC> PartialEq for ProvingContext<F, PC>
@@ -302,11 +290,21 @@ where
     PC: HomomorphicCommitment<F>,
 {
     fn eq(&self, other: &ProvingContext<F,PC>) -> bool {
-        todo!()
+        let prover_key_equality = self.prover_key.eq(&other.prover_key);
+        // TODO: Need to implement eq for pc_commit_key
+        let pc_commit_key_equality = true; //self.pc_commit_key.eq(&other.pc_commit_key);
+        // TODO: Need to implement eq for transcript_equality
+        let transcript_equality = true; //self.transcript.eq(&other.transcript);
+        prover_key_equality || pc_commit_key_equality || transcript_equality
     }
 
     fn ne(&self, other: &ProvingContext<F, PC>) -> bool {
-        todo!()
+        let prover_key_equality = self.prover_key.eq(&other.prover_key);
+        // TODO: Need to implement eq for pc_commit_key
+        let pc_commit_key_equality = true; //self.pc_commit_key.eq(&other.pc_commit_key);
+        // TODO: Need to implement eq for transcript_equality
+        let transcript_equality = true; //self.transcript.eq(&other.transcript);
+        !prover_key_equality || !pc_commit_key_equality || !transcript_equality
     }
 }
 
@@ -320,12 +318,19 @@ where
     where
         W: Write,
     {
-        todo!()
+        self.prover_key.serialize(&mut writer)?;
+        self.pc_commit_key.serialize(&mut writer)?;
+        // TODO: implement serialize for transcript in merlin
+        // self.transcript.serialize(&mut writer)?;
+        Ok(())
     }
 
     #[inline]
     fn serialized_size(&self) -> usize {
-        todo!()
+        self.prover_key.serialized_size()
+            + self.pc_commit_key.serialized_size()
+            // TODO: Need to implement serialized_size() for transcript
+            // + self.transcript.serialized_size()
     }
 
     #[inline]
@@ -333,7 +338,11 @@ where
     where
         W: Write,
     {
-        todo!()
+        self.prover_key.serialize_uncompressed(&mut writer)?;
+        self.pc_commit_key.serialize_uncompressed(&mut writer)?;
+        // TODO: implement serialize_uncompressed for transcript
+        // self.transcript.serialize_uncompressed(&mut writer)?;
+        Ok(())
     }
 
     #[inline]
@@ -341,12 +350,19 @@ where
     where
         W: Write,
     {
-        todo!()
+        self.prover_key.serialize_unchecked(&mut writer)?;
+        self.pc_commit_key.serialize_unchecked(&mut writer)?;
+        // TODO: implement serialize_unchecked for transcript
+        // self.transcript.serialize_unchecked(&mut writer)?;
+        Ok(())
     }
 
     #[inline]
     fn uncompressed_size(&self) -> usize {
-        todo!()
+        self.prover_key.uncompressed_size()
+            + self.pc_commit_key.uncompressed_size()
+            // TODO: implement uncompressed_size for transcript
+            // + self.transcript.uncompressed_size()
     }
 }
 
@@ -360,6 +376,15 @@ where
     where
         R: Read,
     {
+        let prover_key = CanonicalDeserialize::deserialize(&mut reader)?;
+        let pc_commit_key = CanonicalDeserialize::deserialize(&mut reader)?;
+        // TODO: impl CanonicalDeserialize::deserialize for transcript
+        let transcript = CanonicalDeserialize::deserialize(&mut reader)?;
+        // Ok(ProvingContext{            
+        //     prover_key: prover_key,
+        //     pc_commit_key: pc_commit_key,
+        //     transcript: transcript,
+        // })
         todo!()
     }
 
@@ -368,6 +393,15 @@ where
     where
         R: Read,
     {
+        let prover_key = CanonicalDeserialize::deserialize_uncompressed(&mut reader)?;
+        let pc_commit_key = CanonicalDeserialize::deserialize_uncompressed(&mut reader)?;
+        // TODO: impl CanonicalDeserialize::deserialize_uncompressed for transcript
+        let transcript = CanonicalDeserialize::deserialize_uncompressed(&mut reader)?;
+        // Ok(ProvingContext {
+        //     prover_key: prover_key,
+        //     pc_commit_key: pc_commit_key,
+        //     transcript: transcript,
+        // })
         todo!()
     }
 
@@ -376,6 +410,15 @@ where
     where
         R: Read,
     {
+        let prover_key = CanonicalDeserialize::deserialize_unchecked(&mut reader)?;
+        let pc_commit_key = CanonicalDeserialize::deserialize_unchecked(&mut reader)?;
+        // TODO: impl CanonicalDeserialize::deserialize_unchecked for transcript
+        let transcript = CanonicalDeserialize::deserialize_unchecked(&mut reader)?;
+        // Ok(ProvingContext {
+        //     prover_key: prover_key,
+        //     pc_commit_key: pc_commit_key,
+        //     transcript: transcript,
+        // })
         todo!()
     }
 }
@@ -392,7 +435,14 @@ where
     where
         R: codec::Read,
     {
-        todo!()
+        let mut reader = arkworks::codec::ArkReader::new(reader);
+        match CanonicalDeserialize::deserialize_unchecked(&mut reader) {
+            Ok(value) => reader
+                .finish()
+                .map(move |_| value) // TODO: In groth16.rs, we use a move. Why we need a move? We can still pass all tests without `move`
+                .map_err(DecodeError::Read),
+            Err(err) => Err(DecodeError::Decode(err)),
+        }
     }
 }
 
@@ -406,7 +456,9 @@ where
     where
         W: codec::Write,
     {
-        todo!()
+        let mut writer = arkworks::codec::ArkWriter::new(writer);
+        let _ = self.serialize(&mut writer);
+        writer.finish().map(move |_| ()) // TODO: Why we need a move here?
     }
 }
 
