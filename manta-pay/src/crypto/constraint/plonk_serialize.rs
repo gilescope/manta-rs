@@ -482,6 +482,7 @@ where
     PC: HomomorphicCommitment<F>,
 {
     fn default() -> Self {
+        // TDOO: implement default for verifier_key, pc_verifier_key, public_inputs, transcript
         todo!()
     }
 }
@@ -491,9 +492,11 @@ where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
 {
-    fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
-         todo!() 
-        }
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
+        // TODO: impl Debug for VerifierKey and Transcript
+        // write!(f, "verifier_key: {:?}, pc_verifier_key: {:?}, public_inputs: {:?}, transcript: {:?}", self.verifier_key, self.pc_verifier_key, self.public_inputs, self.transcript)
+        write!(f, "pc_verifier_key: {:?}, public_inputs: {:?}", self.pc_verifier_key, self.public_inputs)
+    }
 }
 
 impl<F, PC> CanonicalSerialize for VerifyingContext<F, PC>
@@ -506,12 +509,21 @@ where
     where
         W: Write,
     {
-        todo!()
+        self.verifier_key.serialize(&mut writer)?;
+        self.pc_verifier_key.serialize(&mut writer)?;
+        self.public_inputs.serialize(&mut writer)?;
+        // TODO: impl serialize for Transcript
+        // self.transcript.serialize(&mut writer)?;
+        Ok(())
     }
 
     #[inline]
     fn serialized_size(&self) -> usize {
-        todo!()
+        self.verifier_key.serialized_size()
+            + self.pc_verifier_key.serialized_size()
+            + self.public_inputs.serialized_size()
+            // TODO: impl serialized_size for Transcript
+            // + self.transcript.serialized_size()
     }
 
     #[inline]
@@ -519,7 +531,12 @@ where
     where
         W: Write,
     {
-        todo!()
+        self.verifier_key.serialize_uncompressed(&mut writer)?;
+        self.pc_verifier_key.serialize_uncompressed(&mut writer)?;
+        self.public_inputs.serialize_uncompressed(&mut writer)?;
+        // TODO: impl serialize_uncompressed for transcript
+        // self.transcript.serialize_uncompressed(&mut writer)?;
+        Ok(())
     }
 
     #[inline]
@@ -527,12 +544,21 @@ where
     where
         W: Write,
     {
-        todo!()
+        self.verifier_key.serialize_unchecked(&mut writer)?;
+        self.pc_verifier_key.serialize_unchecked(&mut writer)?;
+        self.public_inputs.serialize_unchecked(&mut writer)?;
+        // TODO: impl serialize_unchecked for Transcript
+        // self.transcript.serialize_unchecked(&mut writer)?;
+        Ok(())
     }
 
     #[inline]
     fn uncompressed_size(&self) -> usize {
-        todo!()
+        self.verifier_key.uncompressed_size()
+            + self.pc_verifier_key.uncompressed_size()
+            + self.public_inputs.uncompressed_size()
+            // TODO: implement uncompressed size for transcript
+            // + self.transcript.uncompressed_size()
     }
 }
 
@@ -546,6 +572,17 @@ where
     where
         R: Read,
     {
+        let verifier_key = CanonicalDeserialize::deserialize(&mut reader)?;
+        let pc_verifier_key = CanonicalDeserialize::deserialize(&mut reader)?;
+        let public_inputs = CanonicalDeserialize::deserialize(&mut reader)?;
+        // TODO: impl CanonicalDeserialize for Transcript
+        let transcript = CanonicalDeserialize::deserialize(&mut reader)?;
+        // Ok(VerifyingContext {
+        //     verifier_key: verifier_key,
+        //     pc_verifier_key: pc_verifier_key,
+        //     public_inputs: public_inputs,
+        //     transcript: transcript,
+        // })
         todo!()
     }
 
@@ -554,6 +591,17 @@ where
     where
         R: Read,
     {
+        let verifier_key = CanonicalDeserialize::deserialize_uncompressed(&mut reader)?;
+        let pc_verifier_key = CanonicalDeserialize::deserialize_uncompressed(&mut reader)?;
+        let public_inputs = CanonicalDeserialize::deserialize_uncompressed(&mut reader)?;
+        // TODO: impl CanonicalDeserialize for Transcript
+        let transcript = CanonicalDeserialize::deserialize_uncompressed(&mut reader)?;
+        // Ok(VerifyingContext {
+        //     verifier_key: verifier_key,
+        //     pc_verifier_key: pc_verifier_key,
+        //     public_inputs: public_inputs,
+        //     transcript: transcript,
+        // })
         todo!()
     }
 
@@ -562,6 +610,17 @@ where
     where
         R: Read,
     {
+        let verifier_key = CanonicalDeserialize::deserialize_unchecked(&mut reader)?;
+        let pc_verifier_key = CanonicalDeserialize::deserialize_unchecked(&mut reader)?;
+        let public_inputs = CanonicalDeserialize::deserialize_unchecked(&mut reader)?;
+        // TODO: impl CanonicalDeserialize for Transcript
+        let transcript = CanonicalDeserialize::deserialize_unchecked(&mut reader)?;
+        // Ok(VerifyingContext {
+        //     verifier_key: verifier_key,
+        //     pc_verifier_key: pc_verifier_key,
+        //     public_inputs: public_inputs,
+        //     transcript: transcript,
+        // })
         todo!()
     }
 }
@@ -578,7 +637,14 @@ where
     where
         R: codec::Read,
     {
-        todo!()
+        let mut reader = arkworks::codec::ArkReader::new(reader);
+        match CanonicalDeserialize::deserialize_unchecked(&mut reader) {
+            Ok(value) => reader
+                .finish()
+                .map(move |_| value) // TODO: In groth16.rs, we use a move. Why we need a move? We can still pass all tests without `move`
+                .map_err(DecodeError::Read),
+            Err(err) => Err(DecodeError::Decode(err)),
+        }
     }
 }
 
@@ -592,12 +658,11 @@ where
     where
         W: codec::Write,
     {
-        todo!()
+        let mut writer = arkworks::codec::ArkWriter::new(writer);
+        let _ = self.serialize(&mut writer);
+        writer.finish().map(move |_| ()) // TODO: Why we need a move here?
     }
 }
-
-
-
 
 mod test {
     
