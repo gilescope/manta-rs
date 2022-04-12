@@ -127,9 +127,10 @@ where
     F: PrimeField,
     PC: HomomorphicCommitment<F>
 {
-    fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
-        todo!() 
-       }
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
+        // TODO: impl Debug trait for Proof in zk-garage
+        write!(f, "Not implemented")
+    }
 }
 
 impl<F, PC> Default for Proof<F, PC>
@@ -138,6 +139,7 @@ where
     PC: HomomorphicCommitment<F>,
 {
     fn default() -> Self {
+        // TODO: impl Default trait for Proof in zk-garage
         todo!()
     }
 }
@@ -147,6 +149,7 @@ where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
 {
+    // TODO: impl PartialEq trait for Proof in zk-garage
     fn eq(&self, other: &Proof<F,PC>) -> bool {
         todo!()
     }
@@ -168,13 +171,16 @@ where
     where
         I: scale_codec::Input,
     {
-        todo!()
+        Ok(Self(
+            CanonicalDeserialize::deserialize(arkworks::codec::ScaleCodecReader(input))
+                .map_err(|_| "Deserialization Error")?,
+        ))
     }
 }
 
 #[cfg(feature = "scale")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "scale")))]
-impl<E> scale_codec::Encode for Proof<F, PC>
+impl<F, PC> scale_codec::Encode for Proof<F, PC>
 where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
@@ -184,14 +190,14 @@ where
     where
         Encoder: FnOnce(&[u8]) -> R,
     {
-        todo!()
+        f(&proof_as_bytes::<E>(&self.0))
     }
 }
 
 
 #[cfg(feature = "scale")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "scale")))]
-impl<E> scale_codec::EncodeLike for Proof<F, PC> 
+impl<F, PC> scale_codec::EncodeLike for Proof<F, PC> 
 where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
@@ -199,20 +205,23 @@ where
 
 #[cfg(feature = "scale")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "scale")))]
-impl<E> scale_codec::MaxEncodedLen for Proof<F, PC>
+impl<F, PC> scale_codec::MaxEncodedLen for Proof<F, PC>
 where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
 {
     #[inline]
     fn max_encoded_len() -> usize {
-        todo!()
+        9 * PC::Commitment::max_encoded_len()
+        + 2 * PC::Proof::max_encoded_len()
+        // TODO: expose ProofEvaluations::<F>. Currently ProofEvaluation comes from a private module linearisation_poly in zk-garage
+        // + ProofEvaluations::<F>::max_encoded_len()
     }
 }
 
 #[cfg(feature = "scale")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "scale")))]
-impl<E> scale_info::TypeInfo for Proof<F, PC>
+impl<F, PC> scale_info::TypeInfo for Proof<F, PC>
 where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
@@ -221,7 +230,7 @@ where
 
     #[inline]
     fn type_info() -> scale_info::Type {
-        todo!()
+        Self::Identity::type_info()
     }
 }
 
@@ -234,7 +243,7 @@ where
 
     #[inline]
     fn try_from(bytes: Vec<u8>) -> Result<Self, Self::Error> {
-        todo!()
+        CanonicalDeserialize::deserialize(&mut bytes.as_slice()).map(Self)
     }
 }
 
@@ -245,7 +254,11 @@ where
     F: PrimeField,
     PC: HomomorphicCommitment<F>,
 {
-    todo!()
+    let mut buffer = Vec::new();
+    proof
+        .serialize(&mut buffer)
+        .expect("Serialization is not allowed to fail.");
+    buffer
 }
 
 /// Uses `serializer` to serialize `proof`.
@@ -257,7 +270,7 @@ where
     PC: HomomorphicCommitment<F>,
     S: Serializer,
 {
-    todo!()
+    serializer.serialize_bytes(&proof_as_bytes::<F, PC>(proof))
 }
 
 /// Proving Context
