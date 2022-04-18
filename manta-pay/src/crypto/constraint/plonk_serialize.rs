@@ -60,9 +60,10 @@ pub struct Error;
 #[derive(derivative::Derivative)]
 #[derivative(
     Clone(bound = "PC::Commitment: Clone, PC::Proof: Clone"),
-    Debug(
-        bound = "PC::Commitment: std::fmt::Debug, PC::Proof: std::fmt::Debug"
-    ),
+    // TODO: Some path issue with std::fmt::Debug
+    // Debug(
+    //     bound = "PC::Commitment: std::fmt::Debug, PC::Proof: std::fmt::Debug"
+    // ),
     Default(bound = "PC::Commitment: Default, PC::Proof: Default"),
     Eq(bound = "PC::Commitment: Eq, PC::Proof: Eq"),
     PartialEq(bound = "PC::Commitment: PartialEq, PC::Proof: PartialEq")
@@ -197,19 +198,19 @@ where
 #[derivative(
     Clone(bound = ""),
     Debug(bound = ""),
-    Eq(bound = ""),
-    PartialEq(bound = "")
 )]
-pub struct ProvingContext<F>
+pub struct ProvingContext<F, PC>
 where
     F: PrimeField,
+    PC: HomomorphicCommitment<F>,
 {
-    proving_key: ProvingKey<F>
+    proving_key: ProvingKey<F, PC>
 }
 
-impl<F> codec::Decode for ProvingContext<F>
+impl<F, PC> codec::Decode for ProvingContext<F, PC>
 where
     F: PrimeField,
+    PC: HomomorphicCommitment<F>,
 {
     type Error = SerializationError;
 
@@ -229,9 +230,10 @@ where
     }
 }
 
-impl<F> codec::Encode for ProvingContext<F>
+impl<F, PC> codec::Encode for ProvingContext<F, PC>
 where
     F: PrimeField,
+    PC: HomomorphicCommitment<F>,
 {
     #[inline]
     fn encode<W>(&self, writer: W) -> Result<(), W::Error>
@@ -248,13 +250,10 @@ where
 #[derive(CanonicalDeserialize, CanonicalSerialize, derivative::Derivative)]
 #[derivative(
     Clone(bound = ""),
-    Debug(
-        bound = "arithmetic::VerifierKey<F,PC>: std::fmt::Debug, PC::Commitment: std::fmt::Debug"
-    ),
-    Eq(bound = "arithmetic::VerifierKey<F,PC>: Eq, PC::Commitment: Eq"),
-    PartialEq(
-        bound = "arithmetic::VerifierKey<F,PC>: PartialEq, PC::Commitment: PartialEq"
-    )
+    // TODO: Some path issue with std::fmt::Debug
+    // Debug(
+    //     bound = "arithmetic::VerifierKey<F,PC>: std::fmt::Debug, PC::Commitment: std::fmt::Debug"
+    // ),
 )]
 pub struct VerifyingContext<F, PC>
 where
