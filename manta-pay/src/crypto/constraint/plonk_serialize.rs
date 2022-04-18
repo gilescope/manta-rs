@@ -17,18 +17,15 @@
 //! PLONK Serialization and Deserialization Implementations
 
 use alloc::vec::Vec;
-use ark_std::fmt::{Formatter, Debug};
+use ark_std::fmt::{Debug};
 
 use ark_ff::{PrimeField};
-use ark_poly::univariate::DensePolynomial;
-use ark_poly_commit::{PolynomialCommitment};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Read, Write};
 use crate::crypto::constraint::arkworks::{
     self,
     codec::{SerializationError},
 };
 use manta_util::codec::{self, DecodeError};
-use merlin::Transcript;
 use zk_garage_plonk::{
     commitment::HomomorphicCommitment,
     proof_system::{self, interface::ProvingKey, VerifierKey, arithmetic},
